@@ -1,0 +1,931 @@
+{
+  "name": "AI Blog Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Blog Generator Form",
+        "formDescription": "Blog to get Blog generation Input",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "topic",
+              "fieldLabel": "Blog Topic",
+              "placeholder": "Topic",
+              "requiredField": true
+            },
+            {
+              "fieldName": "audience",
+              "fieldLabel": "Target Audience",
+              "placeholder": "Target Audience"
+            },
+            {
+              "fieldName": "goal",
+              "fieldLabel": "Goal",
+              "placeholder": "Goal"
+            },
+            {
+              "fieldName": "tone",
+              "fieldLabel": "Tone",
+              "placeholder": "Tone"
+            },
+            {
+              "fieldName": "length_words",
+              "fieldLabel": "Blog Length",
+              "fieldType": "dropdown",
+              "defaultValue": "600",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "600"
+                  },
+                  {
+                    "option": "1000"
+                  },
+                  {
+                    "option": "1500"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldName": "language",
+              "fieldLabel": "Language",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "English"
+                  },
+                  {
+                    "option": "Hindi"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [-3024, -1552],
+      "id": "5fbb8bfb-ea7d-4fa2-aba9-3267002b2e86",
+      "name": "On form submission",
+      "webhookId": "060d230d-3fb1-4e6c-9f3e-4954eea6c45a"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a blog strategist.\n\nCreate a writing brief for the blog using the input.\nReturn ONLY valid JSON.\n\nInput:\nTopic - {{ $json.topic }}\nAudience - {{ $json.audience }}\nGoal - {{ $json.goal }}\nTone -{{ $json.tone }}\n\n\nJSON schema:\n{\n  \"topic\": \"\",\n  \"angle\": \"\",\n  \"audience\": \"\",\n  \"reader_pain_points\": [\"\", \"\", \"\"],\n  \"promise\": \"\",\n  \"key_takeaways\": [\"\", \"\", \"\", \"\"],\n  \"tone_rules\": [\"\", \"\", \"\"],\n  \"do_not_do\": [\"\", \"\", \"\"]\n}\n\nImportant:\n- Angle must be narrow and differentiated\n- Pain points must be practical, not emotional clichés\n- Tone rules should guide *how* sentences are written"
+            },
+            {
+              "content": "=You are a senior content strategist with 10+ years of experience.\n\nYou specialize in:\n- Turning vague ideas into clear, focused writing briefs\n- Defining reader pain, promise, and angle precisely\n- Eliminating generic positioning\n\nRules:\n- Think deeply before writing\n- Be specific, not motivational\n- No marketing fluff\n- No explanations outside JSON\n- Output must be VALID JSON only",
+              "role": "=model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [-2576, -1552],
+      "id": "386c8722-811b-4171-b63d-4dc566f23f34",
+      "name": "Brief Builder",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Create an SEO pack using the brief below.\n\nBrief:\nTopic -{{ $json.seo.topic }}\nTarget Audience -{{ $json.seo.audience }}\nPain Points - {{ $json.seo.reader_pain_points }}\nTake Aways - {{ $json.seo.key_takeaways }}\n\nOutput JSON schema:\n{\n  \"search_intent\": \"informational|commercial|transactional|navigational\",\n  \"primary_keyword\": \"\",\n  \"secondary_keywords\": [\"\", \"\", \"\", \"\", \"\"],\n  \"title_options\": [\"\", \"\", \"\", \"\", \"\"],\n  \"meta_description\": \"\",\n  \"internal_link_ideas\": [\"\", \"\", \"\"],\n  \"faq_questions\": [\"\", \"\", \"\", \"\"]\n}\n\nGuidelines:\n- Primary keyword should feel natural as a blog topic\n- Titles should create curiosity, not clickbait\n- Meta description must clearly promise value\n"
+            },
+            {
+              "content": "=You are an SEO specialist who writes for humans first, algorithms second.\n\nYou understand:\n- Search intent deeply\n- Google’s preference for clarity, usefulness, and structure\n- How to integrate keywords naturally\n\nRules:\n- No keyword stuffing\n- Choose keywords real humans search\n- Titles must sound human, not SEO spam\n- Output JSON only\n",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [-1776, -1648],
+      "id": "f709ef66-90dd-4b25-9dcb-f7eeb3730e44",
+      "name": "SEO Pack - Create",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst textParts = item.json.content.parts.map(p => p.text).join('\\n');\n\nconst cleaned = textParts\n  //.replace(/^```json\\s*/i, '')\n  .replace(/```$/i, '')\n  .trim();\n\nlet seo;\ntry {\n  seo = JSON.parse(cleaned);\n} catch (e) {\n  return [{\n    json: {\n      error: true,\n      error_type: 'SEO_JSON_PARSE_FAILED',\n      raw_output: cleaned\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    seo,\n    error: false\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1424, -1648],
+      "id": "3d938d22-63d8-47e3-9123-507aaccefe31",
+      "name": "Parse SEO Keywords"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are a strict blog QA evaluator and SEO reviewer.\n\nYou must validate:\n- SEO alignment (keyword intent, natural usage, title/meta fit)\n- Structure (H1/H2/H3 clarity, section completeness)\n- Readability (plain language, no fluff)\n- Internal consistency (no contradictions, no missing steps)\n- Safety and credibility (no fake claims, no overpromises)\n\nReturn ONLY valid JSON matching the required schema.\nBe precise and critical."
+            },
+            {
+              "content": "=Evaluate the blog for SEO + quality using the SEO pack\n\nSEO Pack:\nPrimary Keyword - {{ $('Parse SEO Keywords').first().json.seo.primary_keyword }}\nSecondary Keyword -{{ $('Parse SEO Keywords').first().json.seo.secondary_keywords }}\nTitle Options - {{ $('Parse SEO Keywords').first().json.seo.title_options }}\nMeta Description - {{ $('Parse SEO Keywords').first().json.seo.meta_description }}\nSearch Intent - {{ $('Parse SEO Keywords').first().json.seo.search_intent }}\n\nBLOG MARKDOWN:\n{{ $json.content }}\n\nCHECKS:\n1) Primary keyword usage: 0–2 times max, must feel natural\n2) Secondary keywords: at least 2 included naturally (no stuffing)\n3) Search intent match: must clearly satisfy the intent\n4) Title/H1: must align with primary keyword + promise (not clickbait)\n5) Meta description: must match article content (no false promises)\n6) Headings: logical progression, no overlap, no missing key step\n7) Readability: short paragraphs, no AI clichés, no filler\n\nRETURN ONLY JSON in this schema:\n\n{\n  \"pass\": true,\n  \"overall_score\": 0,\n  \"seo_score\": 0,\n  \"readability_score\": 0,\n  \"structure_score\": 0,\n  \"issues\": [\n    {\n      \"severity\": \"critical|major|minor\",\n      \"type\": \"seo|structure|readability|brief\",\n      \"message\": \"\",\n      \"location_hint\": \"\",\n      \"fix_suggestion\": \"\"\n    }\n  ],\n  \"seo_validation\": {\n    \"primary_keyword\": \"\",\n    \"primary_keyword_count_estimate\": 0,\n    \"secondary_keywords_found\": [],\n    \"missing_secondary_keywords\": [],\n    \"intent_match\": \"strong|medium|weak\",\n    \"title_h1_alignment\": \"strong|medium|weak\",\n    \"meta_alignment\": \"strong|medium|weak\"\n  },\n  \"recommended_fixes\": [\n    \"...\"\n  ]\n}\n\nSCORING RULES:\n- Set pass=false if any critical issue exists OR overall_score < 75.\n- overall_score should reflect weighted average: SEO 40%, structure 30%, readability 30%.\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [-176, -1968],
+      "id": "c5419f43-27bd-4d9e-816f-6fab5842a2ac",
+      "name": "SEO + Quality Validation",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert-level SEO content strategist and copywriter with 20 years of experience writing high-performing blog posts.\n\nYour task is to:\n\n1. Improve the provided topic title by generating a better, SEO-optimized blog post title that is more attractive and ranks well on search engines.\n\n2. Write a complete blog post based on the improved title. The post must:\n- Be between {{ $('On form submission').first().json.length_words }} words\n- Use a clear, conversational, and engaging tone\n- Be SEO-friendly with natural keyword integration\n- Start with a hooking introduction that introduces the topic smoothly\n- Use headings and subheadings (H1 for the title, H2 for main sections, H3 for supporting points)\n- Use bullet points or numbered lists where helpful\n- Have a strong conclusion that summarizes the key points and includes a call-to-action or final insight\n- Ensure smooth flow and concise, informative paragraphs\n\n3. Output the result as a JSON object with this format:\n\n```json\n{\n  \"title\": \"Improved SEO-Optimized Title\",\n  \"content\": \"Full blog post content in markdown format\"\n}\n```\n\nHere is the topic you should improve and write about:\n{{ $('On form submission').first().json.topic }}\n\nTarget Audience - {{ $('Is brief Parsing Valid').item.json.seo.audience }}\n\nPain Points - {{ $('Is brief Parsing Valid').item.json.seo.reader_pain_points }}\n\nSEO Keywords:-\nPrimary Keyword - {{ $json.seo.primary_keyword }}\nSecondary Keyword - {{ $json.seo.secondary_keywords }}\nFAQ - {{ $json.seo.faq_questions }}\nMeta Description - {{ $json.seo.meta_description }}\nSearch Intent - {{ $json.seo.search_intent }}\n\n\nGenerate the improved title and the full blog post now.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [-976, -1904],
+      "id": "6445fab9-6f47-402f-90e1-a593abd5324d",
+      "name": "Copywriter"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [-976, -1680],
+      "id": "ba6e8238-2104-461f-b72c-4a55f2bd2d1f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"title\": \"Improved SEO-Optimized Title\",\n  \"content\": \"Full blog post content in markdown format\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [-848, -1680],
+      "id": "ba6052cd-35a4-4c9d-a7de-f0cef9395717",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert-level copywriter with strong SEO knowledge and a clear, engaging writing style. Your task is to revise an existing blog post based on the given topic and user feedback.\n\nHere are your responsibilities:\n- Preserve the good parts of the original content, but rewrite or adjust areas based on the feedback.\n- Use bullet points or numbered lists when it makes the content clearer.\n- Ensure a strong hook in the introduction and a solid conclusion with a call-to-action or takeaway.\n\nHere is the topic title:\n{{ $('Parse Content').item.json.title }}\n\nHere is the user's feedback:\n{{ $json.evaluation.recommended_fixes }}\n\nHere is the original content:\n{{ $('Parse Content').item.json.content }}\n\nNow, rewrite the blog post using this input, carefully fully incorporating the feedback.\n\n3. Output the result as a JSON object with this format:\n\n```json\n{\n  \"title\": \"Improved SEO-Optimized Title\",\n  \"content\": \"Full blog post content in markdown format\"\n}\n```\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "2887ff12-1737-4a7e-850f-006f24e78766",
+      "name": "Copywriter Revision Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [1296, -1552],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "gpt-5.2"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [1376, -1328],
+      "id": "60cb1817-979e-43a9-a563-92fb8af86301",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $('Parse Content').item.json.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [848, -2160],
+      "id": "b0545400-3344-41d3-b5fa-460a630950de",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first(); // first incoming item\nconst text = item.json.output;\n// Remove markdown code fences like ```json and ```\nconst cleaned = text\n  .replace(/^```json\\s*/i, \"\")\n  .replace(/```$/i, \"\")\n  .trim();\n\nlet outlineObj;\ntry {\n  outlineObj = JSON.parse(cleaned);\n} catch (e) {\n return [{\n    json: {\n      error: true,\n      error_type: 'SEO_JSON_PARSE_FAILED',\n      raw_output: cleaned\n    }\n  }];\n}\n\nreturn [\n  {\n    json: {\n      title: outlineObj.title,\n      content: outlineObj.content,\n      error: false\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-624, -1808],
+      "id": "3cceecac-1cdb-4bfc-9313-ba367b441287",
+      "name": "Parse Content"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first(); // first incoming item\nconst text = item.json.output[0].content[0].text;\n// Remove markdown code fences like ```json and ```\nconst cleaned = text\n  .replace(/^```json\\s*/i, \"\")\n  .replace(/```$/i, \"\")\n  .trim();\n\nlet evaluation;\ntry {\n  evaluation = JSON.parse(cleaned);\n} catch (e) {\nreturn [{\n    json: {\n      error: true,\n      error_type: 'SEO_JSON_PARSE_FAILED',\n      raw_output: cleaned\n    }\n  }];\n}\n\nreturn [\n  {\n        json: {\n      evaluation,\n           error: false\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [176, -1968],
+      "id": "912b44a3-e9f4-46cb-8991-e85f788a7d00",
+      "name": "Parse the evaluation Results"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const { topic, length_words, language } = $json;\n\nif (!topic || topic.trim().length < 5) {\n  throw new Error('Invalid topic: too short or empty');\n}\n\nif (!['600','1000','1500'].includes(length_words)) {\n  throw new Error('Invalid length selection');\n}\n\nif (!['English','Hindi'].includes(language)) {\n  throw new Error('Unsupported language');\n}\n\nreturn $json;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-2800, -1552],
+      "id": "f4c1306d-7f74-4905-852e-df37f0d9d879",
+      "name": "Validate Input"
+    },
+    {
+      "parameters": {
+        "content": "# Input Trigger\n\nThis is form input to get the blog details. And also, to validate the data or input provided by the User",
+        "height": 336,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-3120, -1728],
+      "id": "6bc7cdb6-cf9c-4299-9e69-e65064e376c3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst textParts = item.json.content.parts.map(p => p.text).join('\\n');\n\nconst cleaned = textParts\n  .replace(/^```json\\s*/i, '')\n  .replace(/```$/i, '')\n  .trim();\n\nlet seo;\ntry {\n  seo = JSON.parse(cleaned);\n} catch (e) {\n  return [{\n    json: {\n      error: true,\n      error_type: 'SEO_JSON_PARSE_FAILED',\n      raw_output: cleaned\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    seo,\n    error: true\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-2224, -1552],
+      "id": "fcf66990-cf87-437c-afb1-18e777147dbb",
+      "name": "Parse and Validate Brief Node JSON"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c424375f-8181-4ea7-bfda-ac2220262d09",
+              "leftValue": "={{ $json.error !== true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-2000, -1552],
+      "id": "b885f1bc-c510-4a0c-b014-208da794e6fb",
+      "name": "Is brief Parsing Valid"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c424375f-8181-4ea7-bfda-ac2220262d09",
+              "leftValue": "={{ $json.error !== true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-1200, -1648],
+      "id": "fcf9f685-e9c2-415b-8ed0-bbc44cfb4b58",
+      "name": "Is SEO Keywprd Parsing Valid"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a41bb2a7-6799-4a73-a254-8acba3e53902",
+              "name": "revision_count",
+              "value": "={{ ($json.revision_count ?? 0) + 1 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [848, -1968],
+      "id": "419061f2-92d7-4d29-ad27-af039cf945b0",
+      "name": "Revsion Count"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c40d4ea3-0a56-433e-b172-760cdb21f250",
+              "leftValue": "={{ $json.revision_count}}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1072, -1968],
+      "id": "3c27b6ef-0951-4260-9222-ce610028041e",
+      "name": "Is Retry count < 5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c424375f-8181-4ea7-bfda-ac2220262d09",
+              "leftValue": "={{ $json.error !== true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-400, -1872],
+      "id": "c761bfd2-eac6-4a29-99f0-6a9be1b890f4",
+      "name": "Validate SEO keyword parsing"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Failed at Parsing Brief Node"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [-1712, -1456],
+      "id": "23a46046-5126-4987-b637-728e1078a1ef",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Failed at Parsing SEO Keywords Node"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [-912, -1504],
+      "id": "8f713e61-58e3-4a83-8596-4350dae3ff31",
+      "name": "Stop and Error1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Failed at Validate SEO Node"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [-112, -1648],
+      "id": "c0c790c0-0572-4c40-ad3f-96445fb37136",
+      "name": "Stop and Error2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fd5557f5-09dc-4bbe-9899-43a2fb068842",
+              "leftValue": "={{ $json.error}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [400, -1968],
+      "id": "a2e89533-bbd3-4a08-a295-8a6b07ba8202",
+      "name": "Validate Parse Evaluation Results"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c40d4ea3-0a56-433e-b172-760cdb21f250",
+              "leftValue": "={{ $json.evaluation.pass }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [624, -2064],
+      "id": "5f0fb6c4-7386-4587-9907-0f7886196a77",
+      "name": "Validate Evaluation passed"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Validate Parse Evaluation Results"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [624, -1744],
+      "id": "5c0a7ff9-b2b4-4333-a2eb-2b951aca6282",
+      "name": "Stop and Error3"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Retry Count Exceed "
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [1360, -2016],
+      "id": "a091be75-ade8-4acf-92e5-39e0a883c6be",
+      "name": "Stop and Error4"
+    },
+    {
+      "parameters": {
+        "sendTo": "himanshugupta0007@outlook.com",
+        "subject": "=Blog Generated -  {{ $('On form submission').item.json.topic }}",
+        "message": "={{ $('Parse Content').first().json.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [1072, -2160],
+      "id": "0de03fbd-4057-4e04-8335-1039247bdd45",
+      "name": "Send a message",
+      "webhookId": "d84489c4-4f78-4b9c-baa0-cb8d500dfdb5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "topic": "Puja Is About Bhav, Not Time",
+          "audience": "",
+          "goal": "Explain sincerity over duration in puja",
+          "tone": "Spritual, Friendly",
+          "length_words": "600",
+          "language": "English",
+          "submittedAt": "2026-01-29T16:38:44.404+05:30",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brief Builder": {
+      "main": [
+        [
+          {
+            "node": "Parse and Validate Brief Node JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO Pack - Create": {
+      "main": [
+        [
+          {
+            "node": "Parse SEO Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse SEO Keywords": {
+      "main": [
+        [
+          {
+            "node": "Is SEO Keywprd Parsing Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO + Quality Validation": {
+      "main": [
+        [
+          {
+            "node": "Parse the evaluation Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copywriter": {
+      "main": [
+        [
+          {
+            "node": "Parse Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Copywriter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Copywriter",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copywriter Revision Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Copywriter Revision Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Content": {
+      "main": [
+        [
+          {
+            "node": "Validate SEO keyword parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse the evaluation Results": {
+      "main": [
+        [
+          {
+            "node": "Validate Parse Evaluation Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Brief Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse and Validate Brief Node JSON": {
+      "main": [
+        [
+          {
+            "node": "Is brief Parsing Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is brief Parsing Valid": {
+      "main": [
+        [
+          {
+            "node": "SEO Pack - Create",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is SEO Keywprd Parsing Valid": {
+      "main": [
+        [
+          {
+            "node": "Copywriter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revsion Count": {
+      "main": [
+        [
+          {
+            "node": "Is Retry count < 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Retry count < 5": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Copywriter Revision Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate SEO keyword parsing": {
+      "main": [
+        [
+          {
+            "node": "SEO + Quality Validation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Parse Evaluation Results": {
+      "main": [
+        [
+          {
+            "node": "Validate Evaluation passed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Evaluation passed": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Revsion Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "86cbef0b-9a98-4ed8-918e-2de006534570",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "282ea279ae3d09f3c680db6912a3aa9c4089c52c81f11af891ba37d6b2e6f1a4"
+  },
+  "id": "GRTxIDf2-MuWxA5R72DMe",
+  "tags": []
+}
